@@ -3,6 +3,8 @@
 #define esc 10
 #define steer 9
 
+//Need to fit in bluetooth connectivity
+
 #include <Servo.h>
 
 Servo engine;
