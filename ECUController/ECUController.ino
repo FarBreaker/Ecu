@@ -1,38 +1,46 @@
-#define throttle A0  //Should be A0
-#define steering A1  //should be A1
-#define esc 10
-#define steer 9
-
-//Need to fit in bluetooth connectivity
 
 #include <Servo.h>
+#include <SoftwareSerial.h>
+#include <ArduinoBlue.h>
 
-Servo engine;
-Servo steerServo;
+const unsigned long BAUD_RATE = 9600;
 
+Servo esc;
+Servo servo;
+
+const int BLUETOOTH_TX = 8;
+const int BLUETOOTH_RX = 7;
+
+int prevThrottle = 49;
+int prevSteering = 49;
+int throttle, steering;
+
+SoftwareSerial bluetooth(BLUETOOTH_TX, BLUETOOTH_RX);
+ArduinoBlue phone(bluetooth); // pass reference of bluetooth object to ArduinoBlue constructor
+
+// Setup code runs once after program starts.
 void setup() {
-  // put your setup code here, to run once:
-  engine.attach(esc);
-  steerServo.attach(steer);
-  
-  engine.writeMicroseconds(1000);
-  steerServo.write(45);
-  
-  Serial.begin(9600);
+  // Start serial communications.
+  // The baud rate must be the same for both the serial and the bluetooth.
+  Serial.begin(BAUD_RATE);
+  bluetooth.begin(BAUD_RATE);
+  delay(100);
+  esc.attach(10);
+  servo.attach(9);
+  Serial.println("setup complete");
 }
 
+// Put your main code here, to run repeatedly:
 void loop() {
-  // put your main code here, to run repeatedly:
-  int engVal;
-  int steerVal;
-  steerVal = analogRead(steering);
-  engVal = analogRead(throttle);
-  
-  steerVal = map(steerVal, 0, 1023, 60, 120);
-  engVal = map(engVal, 0, 1023, 1000, 2000);
-  engine.writeMicroseconds(engVal);
-  steerServo.write(steerVal);
-  Serial.println(engVal);
-  Serial.println(steerVal);
 
+  // Throttle and steering values go from 0 to 99.
+  // When throttle and steering values are at 99/2 = 49, the joystick is at center.
+  throttle = phone.getThrottle();
+  steering = phone.getSteering();
+  throttle = map(throttle, 0, 99, 1000, 2000);
+  steering = map(steering, 0, 99, 135, 60);
+  Serial.println(throttle);
+  Serial.println(steering);
+  esc.writeMicroseconds(throttle);
+  servo.write(steering);
 }
