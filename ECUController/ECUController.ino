@@ -1,7 +1,9 @@
-
 #include <Servo.h>
 #include <SoftwareSerial.h>
 #include <ArduinoBlue.h>
+
+#define frontLights 6
+#define rearLights 5
 
 const unsigned long BAUD_RATE = 9600;
 
@@ -11,9 +13,13 @@ Servo servo;
 const int BLUETOOTH_TX = 8;
 const int BLUETOOTH_RX = 7;
 
+
 int prevThrottle = 49;
 int prevSteering = 49;
-int throttle, steering;
+bool isOn = false;
+bool lightsOn = false;
+int throttle, steering, button;
+
 
 SoftwareSerial bluetooth(BLUETOOTH_TX, BLUETOOTH_RX);
 ArduinoBlue phone(bluetooth); // pass reference of bluetooth object to ArduinoBlue constructor
@@ -27,20 +33,58 @@ void setup() {
   delay(100);
   esc.attach(10);
   servo.attach(9);
+  esc.writeMicroseconds(1000);
+  pinMode(frontLights, OUTPUT);
+  pinMode(rearLights, OUTPUT);
   Serial.println("setup complete");
 }
 
 // Put your main code here, to run repeatedly:
 void loop() {
+  button = phone.getButton();
+  startEngine();
+  if (isOn)
+  {
+    engine();
+  } else
+  {
+    esc.writeMicroseconds(1000);
+  }
 
-  // Throttle and steering values go from 0 to 99.
-  // When throttle and steering values are at 99/2 = 49, the joystick is at center.
+}
+
+void engine()
+{
   throttle = phone.getThrottle();
   steering = phone.getSteering();
+
   throttle = map(throttle, 0, 99, 1000, 2000);
   steering = map(steering, 0, 99, 135, 60);
+
   Serial.println(throttle);
   Serial.println(steering);
+
   esc.writeMicroseconds(throttle);
   servo.write(steering);
+}
+
+void startEngine()
+{
+  if (button == 1 && isOn)
+  {
+    isOn = !isOn;
+  } else if (button == 1 && !isOn)
+  {
+    isOn = !isOn;
+  }
+}
+void lights()
+{
+  if (button == 2 && lightsOn)
+  {
+    lightsOn = !lightsOn;
+  } else if (button == 2 && !lightsOn)
+  {
+    lightsOn = !lightsOn;
+  }
 }
