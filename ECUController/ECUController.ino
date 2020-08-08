@@ -12,10 +12,10 @@ Servo servo;
 
 const int BLUETOOTH_TX = 8;
 const int BLUETOOTH_RX = 7;
+const long interval = 1000;
+unsigned long previousMillis = 0;
+bool state = false;
 
-
-int prevThrottle = 49;
-int prevSteering = 49;
 bool isOn = false;
 bool lightsOn = false;
 int throttle, steering, button;
@@ -50,7 +50,7 @@ void loop() {
   {
     esc.writeMicroseconds(1000);
   }
-
+  lights();
 }
 
 void engine()
@@ -78,6 +78,7 @@ void startEngine()
     isOn = !isOn;
   }
 }
+
 void lights()
 {
   if (button == 2 && lightsOn)
@@ -86,5 +87,23 @@ void lights()
   } else if (button == 2 && !lightsOn)
   {
     lightsOn = !lightsOn;
+  }
+
+  if (lightsOn)
+  {
+    digitalWrite(frontLights, HIGH);
+    timer();
+  }
+}
+
+void timer()
+{
+  unsigned long currentMillis = millis();
+
+
+  if (currentMillis - previousMillis >= interval)
+  {
+    previousMillis = currentMillis;
+    digitalWrite(rearLights, !state);
   }
 }
