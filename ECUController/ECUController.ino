@@ -2,7 +2,7 @@
 #include <SoftwareSerial.h>
 #include <ArduinoBlue.h>
 
-#define frontLights 6
+#define frontLights 13
 #define rearLights 5
 
 const unsigned long BAUD_RATE = 9600;
@@ -14,6 +14,7 @@ const int BLUETOOTH_TX = 8;
 const int BLUETOOTH_RX = 7;
 const long interval = 1000;
 unsigned long previousMillis = 0;
+int previousSpeed=0;
 bool state = false;
 
 bool isOn = false;
@@ -42,6 +43,9 @@ void setup() {
 // Put your main code here, to run repeatedly:
 void loop() {
   button = phone.getButton();
+
+  
+  
   startEngine();
   if (isOn)
   {
@@ -93,6 +97,10 @@ void lights()
   {
     digitalWrite(frontLights, HIGH);
     timer();
+  }else
+  {
+    digitalWrite(frontLights,LOW);
+    digitalWrite(rearLights,LOW);
   }
 }
 
