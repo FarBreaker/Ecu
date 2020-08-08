@@ -99,8 +99,6 @@ void lights()
 void timer()
 {
   unsigned long currentMillis = millis();
-
-
   if (currentMillis - previousMillis >= interval)
   {
     previousMillis = currentMillis;
